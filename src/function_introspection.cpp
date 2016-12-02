@@ -98,7 +98,6 @@ namespace luabind {
 
 				++count;
 			}
-			/// @todo
 
 			return overloadTable;
 		}
