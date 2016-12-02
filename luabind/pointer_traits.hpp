@@ -25,8 +25,6 @@
 #include <memory>
 #include <stdexcept>
 
-// TODO: Rename to pointer_traits
-
 namespace luabind {
 
 	template<typename T>
@@ -92,53 +90,19 @@ namespace luabind {
 				"luabind: smart pointer does not allow ownership transfer");
 		}
 
-		namespace has_get_pointer_
+		namespace has_get_pointer_test
 		{
 
-			struct any
-			{
-				template<class T> any(T const&);
-			};
+			template< typename T, typename = decltype(get_pointer(std::declval<T>()))>
+			static std::true_type test(int);
 
-			struct no_overload_tag
-			{};
+			template< typename T >
+			static std::false_type test(...);
 
-			typedef char(&yes)[1];
-			typedef char(&no)[2];
+		} // namespace has_get_pointer_test
 
-			no_overload_tag operator, (no_overload_tag, int);
-
-			template<class T>
-			T* get_pointer(T const volatile*);
-
-			template<class T>
-			T* get_pointer(std::unique_ptr<T> const&);
-
-			template<class T>
-			T* get_pointer(std::shared_ptr<T> const&);
-
-			detail::has_get_pointer_::no_overload_tag
-				get_pointer(detail::has_get_pointer_::any);
-
-			///@TODO: Rework
-			template<class T>
-			yes check(T const&);
-			no check(no_overload_tag);
-
-			template<class T>
-			struct impl
-			{
-				static typename std::add_lvalue_reference<T>::type x;
-				static const bool value = (sizeof(has_get_pointer_::check((get_pointer(x), 0))) == 1);
-				typedef std::integral_constant<bool, value> type;
-			};
-
-		} // namespace has_get_pointer_
-
-		template<class T>
-		struct has_get_pointer
-			: has_get_pointer_::impl<T>::type
-		{};
+		template< typename T >
+		using has_get_pointer = decltype(has_get_pointer_test::test<T>(0));
 
 	} // namespace detail
 
