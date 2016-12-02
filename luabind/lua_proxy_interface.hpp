@@ -34,29 +34,17 @@ namespace luabind {
 		template <class T>
 		class lua_proxy_interface;
 
-		///@TODO: replace by decltype construct
 		namespace is_object_interface_aux
 		{
-			typedef char(&yes)[1];
-			typedef char(&no)[2];
 
 			template <class T>
-			yes check(lua_proxy_interface<T>*);
-			no check(void*);
-
-			template <class T>
-			struct impl
-			{
-				static const bool value = sizeof(is_object_interface_aux::check((T*)0)) == sizeof(yes);
-				typedef std::integral_constant<bool, value> type;
-			};
+			std::true_type  test(lua_proxy_interface<T>*);
+			std::false_type test(void*);
 
 		} // namespace is_object_interface_aux
 
 		template <class T>
-		struct is_object_interface :
-			is_object_interface_aux::impl<T>::type
-		{};
+		using is_object_interface = decltype(is_object_interface_aux::test(std::declval<T*>()));
 
 		template <class R, class T, class U>
 		struct enable_binary
